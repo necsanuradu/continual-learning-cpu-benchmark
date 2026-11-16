@@ -1,0 +1,47 @@
+name: Public original continual mechanism CPU operators (non-training)
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/nontraining-mechanism-qualification.yml'
+      - 'scripts/nontraining_mechanism_cpu.py'
+
+permissions:
+  contents: read
+
+jobs:
+  original-mechanism-operators:
+    name: ${{ matrix.competitor }} / original mask operators / Python ${{ matrix.python }}
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - competitor: nevo
+            python: '3.8'
+          - competitor: wave
+            python: '3.10'
+    env:
+      CUDA_VISIBLE_DEVICES: '-1'
+      JAX_PLATFORM_NAME: cpu
+      JAX_PLATFORMS: cpu
+      WANDB_MODE: offline
+      WANDB_DISABLED: 'true'
+      PIP_NO_INPUT: '1'
+    steps:
+      - name: Checkout public qualification scripts
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Setup historical Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Fetch original pinned public source
+        run: bash scripts/fetch_source.sh "${{ matrix.competitor }}"
+      - name: Install original-era public CPU dependencies
+        run: bash scripts/install_cpu.sh "${{ matrix.competitor }}"
+      - name: Execute non-training original mask operators
+        run: python scripts/nontraining_mechanism_cpu.py "${{ matrix.competitor }}"
