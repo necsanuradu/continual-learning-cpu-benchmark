@@ -1,0 +1,52 @@
+name: Original public native-learner CPU diagnostic
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/native-learner-diagnostic.yml'
+      - 'scripts/native_learner_diagnostic.py'
+      - 'scripts/native_learner_deps.sh'
+      - 'scripts/encoder_source_metadata.py'
+
+permissions:
+  contents: read
+
+jobs:
+  native-constructor:
+    name: ${{ matrix.competitor }} / original native learner / Python ${{ matrix.python }}
+    runs-on: ubuntu-22.04
+    timeout-minutes: 24
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - competitor: nevo
+            python: '3.8'
+          - competitor: wave
+            python: '3.10'
+    env:
+      CUDA_VISIBLE_DEVICES: '-1'
+      JAX_PLATFORM_NAME: cpu
+      JAX_PLATFORMS: cpu
+      WANDB_MODE: offline
+      WANDB_DISABLED: 'true'
+      HF_HUB_DISABLE_TELEMETRY: '1'
+      PIP_NO_INPUT: '1'
+    steps:
+      - name: Checkout public diagnostic files
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Historical Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Fetch unchanged pinned public source
+        run: bash scripts/fetch_source.sh "${{ matrix.competitor }}"
+      - name: Install free CPU public native dependencies
+        run: bash scripts/native_learner_deps.sh "${{ matrix.competitor }}"
+      - name: Record original public sentence embedding model commit
+        run: timeout 60s python scripts/encoder_source_metadata.py
+      - name: Execute unchanged native constructor with strict timeout
+        run: timeout 160s python -u scripts/native_learner_diagnostic.py "${{ matrix.competitor }}"
