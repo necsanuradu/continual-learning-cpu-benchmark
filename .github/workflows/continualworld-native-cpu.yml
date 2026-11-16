@@ -1,0 +1,46 @@
+name: Continual World original EWC PackNet CPU native qualification
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/continualworld-native-cpu.yml'
+      - 'scripts/cw_native_cpu.py'
+      - 'scripts/install_cw_native_cpu.sh'
+
+permissions:
+  contents: read
+
+jobs:
+  native-original:
+    name: Original Continual World / ${{ matrix.method }} / CPU
+    runs-on: ubuntu-22.04
+    timeout-minutes: 22
+    strategy:
+      fail-fast: false
+      matrix:
+        method: [ewc, packnet]
+    env:
+      CUDA_VISIBLE_DEVICES: '-1'
+      TF_CPP_MIN_LOG_LEVEL: '2'
+      MUJOCO_GL: osmesa
+      OMP_NUM_THREADS: '2'
+      OPENBLAS_NUM_THREADS: '2'
+      PIP_NO_INPUT: '1'
+    steps:
+      - name: Checkout independent public diagnostic only
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install historical compatible Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.8'
+      - name: Install native original physics system dependencies
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq libosmesa6-dev libglew-dev libgl1-mesa-dev libglfw3 libglfw3-dev patchelf unzip
+      - name: Fetch exact original source and install historical native dependencies
+        run: bash scripts/install_cw_native_cpu.sh
+      - name: Install proven official MuJoCo 2.0 binaries and key
+        run: timeout 130s bash scripts/install_official_mujoco200.sh
+      - name: Original EWC or PackNet simulator constructor and inference only
+        run: timeout 360s python -u scripts/cw_native_cpu.py '${{ matrix.method }}'
