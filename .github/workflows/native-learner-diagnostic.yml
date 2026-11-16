@@ -1,4 +1,4 @@
-name: Nevo original full-size native learner CPU qualification
+name: Nevo original pinned encoder integrity qualification
 
 on:
   workflow_dispatch:
@@ -8,6 +8,7 @@ on:
       - 'scripts/nevo_full_native_cpu.py'
       - 'scripts/nevo_full_native_deps.sh'
       - 'scripts/nevo_public_encoder_pin.py'
+      - 'tools/nevo_encoder_integrity_lock.py'
 
 permissions:
   contents: read
@@ -50,11 +51,7 @@ jobs:
         run: timeout 130s bash scripts/install_official_mujoco200.sh
       - name: Install native public CPU inference dependencies
         run: bash scripts/nevo_full_native_deps.sh
-      - name: Authenticate and cache original public sentence encoder revision
-        run: timeout 160s python -u scripts/nevo_public_encoder_pin.py
-      - name: Execute unchanged full-size learner constructor mask task and forward
-        env:
-          # Legacy sentence-transformers 2.2.2 requires online resolution of
-          # the model alias; preceding step verifies the immutable public SHA.
-          TOKENIZERS_PARALLELISM: 'false'
-        run: timeout 520s python -u scripts/nevo_full_native_cpu.py
+      - name: Verify each immutable model asset and three negative fail-closed tests
+        run: timeout 300s python -u tools/nevo_encoder_integrity_lock.py prepare
+      - name: Execute original learner offline and validate actually loaded tensors
+        run: timeout 560s python -u tools/nevo_encoder_integrity_lock.py execute

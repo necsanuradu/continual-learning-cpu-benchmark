@@ -1,0 +1,113 @@
+{
+  "schema": "D170-R2R/public-source-execution-freeze-v1",
+  "date": "2026-11-16",
+  "no_training": true,
+  "no_proprietary_artifacts": true,
+  "sources": {
+    "nevo": {
+      "repository": "yeshenpy/Nevo-CRL",
+      "commit": "fe0456e1ae5382213d12421270209eb3f47a9a0f",
+      "native": "CoTASPLearner",
+      "population": 5,
+      "actor_layers": [
+        1024,
+        1024,
+        1024,
+        1024
+      ],
+      "critic_layers": [
+        256,
+        256,
+        256,
+        256
+      ],
+      "tasks": 20
+    },
+    "wave": {
+      "repository": "ggtz/WAVE",
+      "commit": "7814979cb1f8f4324fc3a48881591b1d0c7d7989",
+      "authentic_status": "BLOCKED_missing_trained_soms/som_layer_0..3.npy"
+    },
+    "metaworld": {
+      "repository": "Farama-Foundation/Metaworld",
+      "commit": "0875192baaa91c43523708f55866d98eaf3facaf"
+    },
+    "continualworld": {
+      "repository": "awarelab/continual_world",
+      "commit": "73f63bb4fa0b5d00bda973e20dfb783bfcf1b8aa",
+      "authentic_status": "UNTESTED",
+      "license": "UNVERIFIED_NO_ROOT_LICENSE",
+      "redistribution_permitted": false
+    }
+  },
+  "nevo_dependency_receipt": {
+    "python": "3.8.18",
+    "jax": "0.3.17",
+    "jaxlib": "0.3.15",
+    "flax": "0.6.2",
+    "gym": "0.24.1",
+    "torch": "2.1.2+cpu",
+    "transformers": "4.30.2",
+    "sentence_transformers": "2.2.2",
+    "huggingface_hub": "0.16.4",
+    "mujoco_py": "2.0.2.8"
+  },
+  "nevo_encoder": {
+    "model": "sentence-transformers/all-MiniLM-L12-v2",
+    "preflight_revision": "a50ef00143b4d5391434df20ae11632588ac25be",
+    "license": "apache-2.0",
+    "historical_run_loaded_asset_hash_verification": "NOT_PERFORMED",
+    "new_independent_integrity_gate": "PENDING_EXECUTION"
+  },
+  "physics": {
+    "engine": "MuJoCo 2.0",
+    "official_archive": "https://www.roboti.us/download/mujoco200_linux.zip",
+    "archive_sha256_from_runner": "ba8560040f6ca47dbd89e4731bc9e06080a99eba4583cda95cdedca802389153"
+  },
+  "receipts": [
+    {
+      "id": 43783031695,
+      "commit": "291736aa868d2ce9a18683c7d2968fe1c7c3a7d1",
+      "status": "SUCCESS",
+      "scope": "native_policy_forward_only"
+    },
+    {
+      "id": 43783553763,
+      "commit": "109906418a9bde86ebe2b9176110c92e9ef00336",
+      "status": "SUCCESS",
+      "scope": "structural_synthetic_diagnostics_only"
+    },
+    {
+      "id": 43791220667,
+      "commit": "32d48b0c0ce2346cc6d876ae58921e43e4d3fe25",
+      "status": "SUCCESS",
+      "scope": "original_MetaWorld_reset_step"
+    },
+    {
+      "id": 43792710546,
+      "commit": "aa7d3eb505747d7a3588c5cf014e27d74164a9dd",
+      "status": "SUCCESS",
+      "scope": "original_wrapper_and_MetaWorld_reset_step"
+    },
+    {
+      "id": 43794300420,
+      "commit": "4a2321aaa16571fe0dd11383ed40540334fd3e26",
+      "status": "SUCCESS",
+      "scope": "full_size_original_Nevo_constructor_embedding_masks_forward",
+      "job": 133059488806,
+      "pass_markers": [
+        "NEVO_NATIVE_LEARNER_CONSTRUCTOR_PASS",
+        "NEVO_NATIVE_TASK_EMBEDDING_PASS",
+        "NEVO_NATIVE_TASK_MASKS_PASS",
+        "NEVO_NATIVE_LEARNER_FORWARD_PASS"
+      ]
+    }
+  ],
+  "scientific_limits": [
+    "No sequential training yet",
+    "No acquisition or retention measured",
+    "No computational advantage claim",
+    "Preflight encoder SHA is not the same as verifying actual loaded model bytes",
+    "CW alternative not yet native qualified"
+  ]
+}
