@@ -1,0 +1,100 @@
+name: D170-R2S original-source CW20 untrained evaluator
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/cw20-evaluator.yml'
+      - 'tools/cw20_protocol.py'
+      - 'tools/cw20_evaluator.py'
+      - 'tools/cw20_metrics.py'
+      - 'tools/cw20_native.py'
+      - 'scripts/cw20_native_eval.py'
+      - 'tests/test_cw20_harness.py'
+
+permissions:
+  contents: read
+
+jobs:
+  synthetic-metrics:
+    name: Independent stdlib no-training metrics and failure tests
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.8'
+      - name: Run all independent CW20 synthetic metrics and lifecycle tests
+        run: python -m unittest discover -s tests -p 'test_cw20_harness.py' -v
+  original-native-cw:
+    name: Original Continual World ${{ matrix.method }} CW20 episode receipts
+    runs-on: ubuntu-22.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        method: [ewc, packnet]
+    env:
+      CUDA_VISIBLE_DEVICES: '-1'
+      MUJOCO_GL: osmesa
+      OMP_NUM_THREADS: '2'
+      OPENBLAS_NUM_THREADS: '2'
+      PIP_NO_INPUT: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.8'
+      - name: Original physics OS requirements
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq libosmesa6-dev libglew-dev libgl1-mesa-dev libglfw3 libglfw3-dev patchelf unzip
+      - name: Get exact pinned original sources, TensorFlow and simulator
+        run: bash scripts/install_cw_native_cpu.sh
+      - name: Restore official MuJoCo 2.0
+        run: timeout 130s bash scripts/install_official_mujoco200.sh
+      - name: Original CW20 common evaluation without training
+        run: timeout 360s python -u scripts/cw20_native_eval.py --method '${{ matrix.method }}' --output cw20-${{ matrix.method }}.jsonl
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cw20-${{ matrix.method }}-nontraining-episodes
+          path: cw20-${{ matrix.method }}.jsonl
+          if-no-files-found: ignore
+  original-native-nevo:
+    name: Original Nevo CW20 task-zero untrained episode receipts
+    runs-on: ubuntu-22.04
+    timeout-minutes: 24
+    env:
+      CUDA_VISIBLE_DEVICES: '-1'
+      JAX_PLATFORM_NAME: cpu
+      JAX_PLATFORMS: cpu
+      OMP_NUM_THREADS: '2'
+      OPENBLAS_NUM_THREADS: '2'
+      D4RL_SUPPRESS_IMPORT_ERROR: '1'
+      PIP_NO_INPUT: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.8'
+      - name: Fetch original pinned Nevo source
+        run: bash scripts/fetch_source.sh nevo
+      - name: Original physics OS requirements
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq libosmesa6-dev libglew-dev libgl1-mesa-dev libglfw3 libglfw3-dev patchelf unzip
+      - name: Proven original historical MetaWorld and JAX stack
+        run: bash scripts/install_historical_metaworld.sh nevo
+      - name: Original wrapper imports
+        run: python -m pip install 'dm-env==1.6' 'dm-control==1.0.23'
+      - name: Official original MuJoCo 2.0
+        run: timeout 130s bash scripts/install_official_mujoco200.sh
+      - name: Original native learner public inference dependencies
+        run: bash scripts/nevo_full_native_deps.sh
+      - name: Immutable native task-encoder cache and three negative tests
+        run: timeout 310s python -u tools/nevo_encoder_integrity_lock.py prepare
+      - name: Original-source CW20 Nevo evaluator no training
+        run: timeout 550s python -u scripts/cw20_native_eval.py --method nevo --output cw20-nevo.jsonl
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cw20-nevo-nontraining-episodes
+          path: cw20-nevo.jsonl
+          if-no-files-found: ignore

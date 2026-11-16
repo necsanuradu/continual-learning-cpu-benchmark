@@ -1,0 +1,26 @@
+{
+  "schema": "D170-R2S/immutable-evidence-supersession-v1",
+  "prior": "evidence/D170_R2R_PUBLIC_REPRODUCIBLE_MANIFEST.json",
+  "prior_git_blob_sha": "4a6df06edeaddc1bc2554bdf43ff5268cacbeb4f",
+  "successor": "evidence/D170_R2R_QUALIFICATION_RESULTS.json",
+  "successor_git_blob_sha": "0354bf5899236c4d280c54be6671ceddaaa1615b",
+  "prior_statuses_preserved": [
+    {
+      "json_path": "nevo_encoder.new_independent_integrity_gate",
+      "previous": "PENDING_EXECUTION",
+      "new": "PASS",
+      "source_run": 43882825412,
+      "git_commit": "baed0ccdefc59a6f8b647fb8d4a5eee54d769aa3"
+    },
+    {
+      "json_path": "sources.continualworld.authentic_status",
+      "previous": "UNTESTED",
+      "new": "NATIVE_CONSTRUCTION_AND_FORWARD_PASS_NO_TRAINING",
+      "source_run": 43883076410,
+      "git_commit": "3bed3655b2a1e1c41d224618e6dbe6a77ab933fa"
+    }
+  ],
+  "license_status_unchanged": "UNVERIFIED_NO_ROOT_LICENSE",
+  "training_status_unchanged": "NOT_AUTHORIZED",
+  "evidence_policy": "append-only; historical files untouched"
+}
