@@ -54,7 +54,7 @@ jobs:
         run: timeout 160s python -u scripts/nevo_public_encoder_pin.py
       - name: Execute unchanged full-size learner constructor mask task and forward
         env:
-          HF_HUB_OFFLINE: '1'
-          TRANSFORMERS_OFFLINE: '1'
+          # Legacy sentence-transformers 2.2.2 requires online resolution of
+          # the model alias; preceding step verifies the immutable public SHA.
           TOKENIZERS_PARALLELISM: 'false'
         run: timeout 520s python -u scripts/nevo_full_native_cpu.py
