@@ -1,0 +1,62 @@
+name: D170-R2U non-training event accounting qualification
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/d170-r2u-events.yml'
+      - 'tools/d170_r2u_events.py'
+      - 'tests/test_d170_r2u_events.py'
+      - 'docs/D170_R2U_FOUNDER_AUTHORIZATION.md'
+      - 'docs/D170_R2U_INSTRUMENTATION_PLAN.md'
+
+permissions:
+  contents: read
+
+jobs:
+  synthetic-interruption-and-integrity:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: Independent synthetic ledger, source integrity and interruption tests
+        run: |
+          python -m unittest discover -s tests -p 'test_d170_r2u_events.py' -v
+          python -m unittest discover -s tests -p 'test_d170_r2t.py' -v
+      - name: Generate model-free diagnostic accounting artifact
+        run: |
+          python - <<'PY'
+          import json, tempfile
+          from pathlib import Path
+          from tools.d170_r2u_events import EventJournal, aggregate, METHOD_SHA
+          with tempfile.TemporaryDirectory() as folder:
+              j=EventJournal(Path(folder)/"costs.jsonl", "D170-R2U-synthetic",
+                             "nevo",wall_clock=lambda: 5000,cpu_clock=lambda: 2000)
+              a=j.start(stage_index=0,operation="inference",scope="actor")
+              j.complete(a,actual_invocations=1,parameter_updates=0,batch_elements=1)
+              b=j.start(stage_index=1,operation="nevo_distillation",scope="population",
+                        population_member=0,configured_iterations=40000)
+              j.interrupted_recovery()
+              result=aggregate(j.records,expected_execution_id="D170-R2U-synthetic")
+              assert result["completed_events"]==1
+              assert result["interrupted_event_ids"]==[b]
+              assert not result["open_event_ids"]
+              assert sum(x["parameter_updates"] or 0 for x in result["groups"])==0
+              record={"schema":"D170-R2U/synthetic-receipt-v1",
+                      "event_summary":result, "original_source_sha":METHOD_SHA["nevo"],
+                      "training_performed":False, "synthetic_only":True}
+              Path("D170_R2U_SYNTHETIC_VALIDATION.json").write_text(
+                  json.dumps(record,indent=2,sort_keys=True)+"\n")
+              print("D170_R2U_SYNTHETIC_LEDGER_PASS "+
+                    json.dumps({"completed":1,"interrupted":1,"training_updates":0}))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: D170-R2U-synthetic-journal-only
+          path: D170_R2U_SYNTHETIC_VALIDATION.json
+          if-no-files-found: error
