@@ -1,0 +1,169 @@
+{
+  "schema": "D170-R2S/public-CW20-evaluator-acceptance-v1",
+  "report_date_utc": "2026-11-16",
+  "qualification_run": {
+    "id": 43890292105,
+    "commit": "c12bddc12945c425530767d846410cbf494225a8",
+    "conclusion": "success",
+    "all_jobs_success": true
+  },
+  "methods_source_sha": {
+    "nevo": "fe0456e1ae5382213d12421270209eb3f47a9a0f",
+    "ewc": "73f63bb4fa0b5d00bda973e20dfb783bfcf1b8aa",
+    "packnet": "73f63bb4fa0b5d00bda973e20dfb783bfcf1b8aa",
+    "metaworld": "0875192baaa91c43523708f55866d98eaf3facaf"
+  },
+  "tests": {
+    "job_id": 133379331746,
+    "executed": 7,
+    "passed": 7,
+    "failed": 0,
+    "source": "tests/test_cw20_harness.py",
+    "validated": [
+      "CW20 exact task sequence",
+      "repeat-stage seed schedule",
+      "finite episode aggregation",
+      "failure on missing original success/nonfinite actions",
+      "synthetic retention/forgetting",
+      "exception-safe original lifecycle",
+      "PackNet scratch/state distinction"
+    ]
+  },
+  "native_runs": {
+    "nevo": {
+      "job_id": 133379332478,
+      "pass": true,
+      "episodes": 2,
+      "task_indices": [
+        0,
+        0
+      ],
+      "name": "hammer-v1",
+      "inference": "original CoTASPLearner.sample_actions stochastic",
+      "original_model_size": "5 actors, 4 x 1024 hidden neurons",
+      "metaworld_observation_width": 12,
+      "simulator_interactions": 10,
+      "inference_calls": 10,
+      "success_flags": [
+        0,
+        0
+      ],
+      "mean_raw_reward": -0.8201419125030428,
+      "replay_probe": {
+        "same_seed": true,
+        "reward_exact_match": true,
+        "success_and_length_match": true,
+        "first_reward": -0.8439381230585365
+      },
+      "artifact_id": 14236157900,
+      "artifact_name": "cw20-nevo-nontraining-episodes"
+    },
+    "ewc": {
+      "job_id": 133379332182,
+      "pass": true,
+      "episodes": 4,
+      "task_indices": [
+        0,
+        0,
+        10,
+        10
+      ],
+      "name": "hammer-v1",
+      "inference": "original EWC_SAC.on_test_start/get_action_test/on_test_end deterministic",
+      "metaworld_observation_width": 32,
+      "task_one_hot_width": 20,
+      "simulator_interactions": 20,
+      "inference_calls": 20,
+      "success_flags": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "mean_rewards_by_stage": {
+        "0": -0.8422173982849401,
+        "10": -0.8433086630508919
+      },
+      "replay_probe": {
+        "same_seed": true,
+        "reward_exact_match": true,
+        "success_and_length_match": true,
+        "first_reward": -0.8632996056112674
+      },
+      "live_model_restored": true,
+      "artifact_id": 14235104840,
+      "artifact_name": "cw20-ewc-nontraining-episodes"
+    },
+    "packnet": {
+      "job_id": 133379332383,
+      "pass": true,
+      "episodes": 4,
+      "task_indices": [
+        0,
+        0,
+        10,
+        10
+      ],
+      "name": "hammer-v1",
+      "inference": "original PackNet_SAC.on_test_start/get_action_test/on_test_end deterministic",
+      "metaworld_observation_width": 32,
+      "task_one_hot_width": 20,
+      "simulator_interactions": 20,
+      "inference_calls": 20,
+      "success_flags": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "mean_rewards_by_stage": {
+        "0": -0.8422173956024973,
+        "10": -0.8433086619190077
+      },
+      "replay_probe": {
+        "same_seed": true,
+        "reward_exact_match": true,
+        "success_and_length_match": true,
+        "first_reward": -0.8632996035961108
+      },
+      "live_model_restored": true,
+      "scratch_cache_excluded_from_live_param_hash_as_upstream_intended": true,
+      "artifact_id": 14236003139,
+      "artifact_name": "cw20-packnet-nontraining-episodes"
+    }
+  },
+  "context": {
+    "diagnostic_episode_cap": 5,
+    "actual_full_CW20_episodes_executed": false,
+    "observed_successes": 0,
+    "training_updates": 0,
+    "optimizer_steps": 0,
+    "no_model_weights_published": true,
+    "no_original_unlicensed_code_published": true,
+    "no_PathLight_proprietary_code_architecture_or_result_published": true,
+    "native_input_equivalence_asserted": false,
+    "obtained_comparative_learning_or_retention": false,
+    "repeat_test_only": "exact reward/success/length within same five-step short diagnostic episode, NOT full trajectory or training determinism",
+    "measured_resource_fields": "Per-episode JSONL artifact stores first/steady inference timing, initialization seconds, simulator time, peak process RSS KiB, model parameter counts; not an inter-model performance ranking"
+  },
+  "historic_failures_preserved": [
+    {
+      "run": 43888383443,
+      "conclusion": "failure",
+      "issue": "PackNet scratch cache retained by original lifecycle triggered overly broad state snapshot"
+    },
+    {
+      "run": 43889450961,
+      "conclusion": "failure",
+      "issue": "Synthetic test fixtures required unavailable numpy and tuple-specific snapshot diagnostic; all native jobs passed"
+    }
+  ],
+  "rights_and_training": {
+    "no_public_redistribution_of_continual_world_source": true,
+    "continual_world_license_confirmed": false,
+    "neural_training_authorized": false,
+    "expenditure_gbp": 0,
+    "scientific_comparative_training_status": "NO_GO",
+    "harness_engineering_status": "PASS_CONDITIONAL_GO_FOR_FURTHER_NONTRAINING_VALIDATION"
+  }
+}
