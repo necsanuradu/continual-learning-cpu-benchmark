@@ -27,7 +27,11 @@ def cw_state(agent):
         if model is not None:
             for i, v in enumerate(model.variables):
                 data[name+"/"+str(i)+"/"+v.name]=_hash_array(v.numpy())
-    for name in ("owner","saved_variables"):
+    # PackNet saved_variables is an internal scratch buffer intentionally
+    # populated by on_test_start and retained after on_test_end. It is not
+    # a model parameter. Verify all LIVE network variables, ownership masks,
+    # and active-view controls; never demand scratch-buffer equality.
+    for name in ("owner",):
         table=getattr(agent,name,None)
         if table:
             for i,ref in enumerate(sorted(table,key=lambda r:str(r.deref().name))):
@@ -61,7 +65,8 @@ def guarded_cw_evaluation(agent, seq_idx, callback, state_digest=cw_state):
                 raise QualificationError("Native on_test_end failed: "+repr(e)) from e
         after=state_digest(agent)
         if after != before:
-            raise QualificationError("Native EWC/PackNet model state not restored after evaluation")
+            changed = sorted(k for k in (set(before)|set(after)) if before.get(k) != after.get(k))
+            raise QualificationError("Native EWC/PackNet LIVE model state not restored: " + ",".join(changed[:12]))
     if original_error is not None:
         raise original_error
     return result

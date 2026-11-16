@@ -93,4 +93,25 @@ class Tests(unittest.TestCase):
             def on_test_end(self,i):self.calls.append("end")
         with self.assertRaises(QualificationError):
             guarded_cw_evaluation(Faulty(),0,lambda:None,lambda agent:tuple(agent.x))
+    def test_packnet_scratch_not_part_of_live_model_invariant(self):
+        from tools.cw20_native import cw_state
+        class FakeTensor:
+            def __init__(self, data):self.data=data
+            def numpy(self):return self.data
+        class FakeOwner:
+            def __init__(self):
+                self.name="weight:0"
+            def deref(self):return self
+        class FakeAgent:
+            actor=None;critic1=None;critic2=None;target_critic1=None;target_critic2=None
+            def __init__(self):
+                self.current_view=FakeTensor(-1)
+                self.freeze_biases_and_normalization=FakeTensor(False)
+                self.saved_variables={FakeOwner():FakeTensor(0)}
+                self.owner={}
+        agent=FakeAgent()
+        before=cw_state(agent)
+        next(iter(agent.saved_variables.values())).data=12
+        after=cw_state(agent)
+        self.assertEqual(before,after,"Original PackNet scratch capture is not a model-weight mutation")
 if __name__=="__main__":unittest.main()

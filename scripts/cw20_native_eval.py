@@ -80,6 +80,32 @@ def use_cw(method):
         row=guarded_cw_evaluation(agent,idx,run,lambda a:cw_state(a))
         rows.append(row)
     validate(rows)
+    # Re-run an identical original task/seed/mode after separate environment
+    # construction. A divergence is reported, never hidden or called PASS.
+    probe_item=evaluation_plan(100110,[0],1,("deterministic",))[0]
+    idx=0
+    def probe_run():
+        return evaluate_episode(probe_item,create,
+            lambda obs,s:cw_policy_action(agent,obs,s),
+            method=method,source_sha=CONTINUAL_WORLD_SHA,
+            model_init_seconds=init,parameter_receipt=stats,
+            wrappers={"metaworld_sha":METAWORLD_SHA,"physics":"MuJoCo-2.0",
+                "mujoco_py":"2.0.2.8","wrapper":"original-ContinualWorld",
+                "randomization":"random_init_all","native_observation_width":32,
+                "side_information":"20-position-task-one-hot",
+                "task_label_position":0},max_steps=5)
+    probe=guarded_cw_evaluation(agent,0,probe_run,lambda a:cw_state(a))
+    previous=rows[0]
+    equal=(probe["raw_reward"]==previous["raw_reward"] and
+           probe["success"]==previous["success"] and
+           probe["episode_length"]==previous["episode_length"])
+    log("CW20_REPLAY_DETERMINISM_PROBE",{
+        "method":method,"same_episode_seed":probe["evaluation_seed"]==previous["evaluation_seed"],
+        "same_stage":True,"same_policy_mode":True,
+        "same_reward_success_length":equal,
+        "reward_first":previous["raw_reward"],"reward_repeat":probe["raw_reward"],
+        "interpretation":"exact_replay" if equal else "environment_or_policy_replay_diverged",
+        "training_updates":0})
     return rows
 
 def use_nevo():
@@ -137,6 +163,30 @@ def use_nevo():
     verify(json.loads(LOCK.read_text()))
     assert learner.step==0 and all(a.step==0 for a in learner.actor_pop)
     validate(rows)
+    original=rows[0]
+    same=evaluation_plan(100110,[0],1,("stochastic",))[0]
+    counter=[0]
+    replay=evaluate_episode(same,create,action,
+                method="nevo",source_sha=NEVO_SHA,
+                model_init_seconds=init,parameter_receipt=stats,
+                wrappers={"metaworld_sha":METAWORLD_SHA,"physics":"MuJoCo-2.0",
+                    "mujoco_py":"2.0.2.8","wrapper":"original-Nevo",
+                    "randomization":"random_init_all","native_observation_width":12,
+                    "side_information":"384-dimensional-task-hint-encoder-initialized",
+                    "model_revision":"a50ef00143b4d5391434df20ae11632588ac25be"},
+                max_steps=5)
+    equivalent=(replay["raw_reward"]==original["raw_reward"] and
+                replay["success"]==original["success"] and
+                replay["episode_length"]==original["episode_length"])
+    log("CW20_REPLAY_DETERMINISM_PROBE",{
+        "method":"nevo","same_episode_seed":replay["evaluation_seed"]==original["evaluation_seed"],
+        "same_stage":True,"same_policy_mode":True,
+        "same_reward_success_length":equivalent,
+        "reward_first":original["raw_reward"],"reward_repeat":replay["raw_reward"],
+        "interpretation":"exact_replay" if equivalent else "environment_or_policy_replay_diverged",
+        "training_updates":0})
+    verify(json.loads(LOCK.read_text()))
+    assert learner.step==0 and all(a.step==0 for a in learner.actor_pop)
     return rows
 
 def main():
@@ -145,7 +195,9 @@ def main():
     ap.add_argument("--output",required=True)
     args=ap.parse_args()
     rows=use_nevo() if args.method=="nevo" else use_cw(args.method)
-    write_jsonl(args.output,rows)
+    # Native diagnostics change cwd into the checked-out competitor source.
+    # Always save public evidence under the independent benchmark checkout.
+    write_jsonl(ROOT/args.output,rows)
     summaries=summarise(rows)
     log("CW20_EVALUATOR_NATIVE_PASS",{
         "method":args.method,"episodes":len(rows),
