@@ -1,0 +1,40 @@
+name: Original Nevo MuJoCo 2.0 MetaWorld CPU execution
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/nevo-original-mujoco200.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  nevo-original-physics:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 18
+    env:
+      CUDA_VISIBLE_DEVICES: '-1'
+      JAX_PLATFORM_NAME: cpu
+      JAX_PLATFORMS: cpu
+      MUJOCO_GL: osmesa
+      WANDB_MODE: offline
+      WANDB_DISABLED: 'true'
+      PIP_NO_INPUT: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.8'
+      - name: Verify unchanged original source SHA
+        run: bash scripts/fetch_source.sh nevo
+      - name: Install free historical OS dependencies
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq libosmesa6-dev libglew-dev libgl1-mesa-dev libglfw3 libglfw3-dev patchelf unzip
+      - name: Install pinned historical MetaWorld and mujoco-py bindings
+        run: bash scripts/install_historical_metaworld.sh nevo
+      - name: Download and SHA256 receipt of official MuJoCo 2.0 binaries and key
+        run: timeout 130s bash scripts/install_official_mujoco200.sh
+      - name: Original MT50 create reset and step (no learning)
+        run: timeout 240s python -u scripts/historical_metaworld_cpu.py nevo
