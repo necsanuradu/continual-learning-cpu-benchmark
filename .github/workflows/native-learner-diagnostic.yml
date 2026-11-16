@@ -1,52 +1,60 @@
-name: Original public native-learner CPU diagnostic
+name: Nevo original full-size native learner CPU qualification
 
 on:
   workflow_dispatch:
   push:
     paths:
       - '.github/workflows/native-learner-diagnostic.yml'
-      - 'scripts/native_learner_diagnostic.py'
-      - 'scripts/native_learner_deps.sh'
-      - 'scripts/encoder_source_metadata.py'
+      - 'scripts/nevo_full_native_cpu.py'
+      - 'scripts/nevo_full_native_deps.sh'
+      - 'scripts/nevo_public_encoder_pin.py'
 
 permissions:
   contents: read
 
 jobs:
-  native-constructor:
-    name: ${{ matrix.competitor }} / original native learner / Python ${{ matrix.python }}
+  nevo-native-full-size:
+    name: Nevo / original CoTASPLearner / population5 / 1024x4 CPU
     runs-on: ubuntu-22.04
     timeout-minutes: 24
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - competitor: nevo
-            python: '3.8'
-          - competitor: wave
-            python: '3.10'
     env:
-      CUDA_VISIBLE_DEVICES: '-1'
       JAX_PLATFORM_NAME: cpu
       JAX_PLATFORMS: cpu
+      CUDA_VISIBLE_DEVICES: '-1'
       WANDB_MODE: offline
       WANDB_DISABLED: 'true'
       HF_HUB_DISABLE_TELEMETRY: '1'
       PIP_NO_INPUT: '1'
+      D4RL_SUPPRESS_IMPORT_ERROR: '1'
+      OMP_NUM_THREADS: '2'
+      OPENBLAS_NUM_THREADS: '2'
+      XLA_PYTHON_CLIENT_PREALLOCATE: 'false'
     steps:
-      - name: Checkout public diagnostic files
+      - name: Checkout public-only qualification scripts
         uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - name: Historical Python
+      - name: Original Python 3.8
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python }}
-      - name: Fetch unchanged pinned public source
-        run: bash scripts/fetch_source.sh "${{ matrix.competitor }}"
-      - name: Install free CPU public native dependencies
-        run: bash scripts/native_learner_deps.sh "${{ matrix.competitor }}"
-      - name: Record original public sentence embedding model commit
-        run: timeout 60s python scripts/encoder_source_metadata.py
-      - name: Execute unchanged native constructor with strict timeout
-        run: timeout 160s python -u scripts/native_learner_diagnostic.py "${{ matrix.competitor }}"
+          python-version: '3.8'
+      - name: Fetch exact original Nevo source
+        run: bash scripts/fetch_source.sh nevo
+      - name: Install original CPU physics OS dependencies
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq libosmesa6-dev libglew-dev libgl1-mesa-dev libglfw3 libglfw3-dev patchelf unzip
+      - name: Install proven original MetaWorld and JAX stack
+        run: bash scripts/install_historical_metaworld.sh nevo
+      - name: Install original wrapper imports
+        run: python -m pip install 'dm-env==1.6' 'dm-control==1.0.23'
+      - name: Recover original free MuJoCo 2.0 binaries and activation
+        run: timeout 130s bash scripts/install_official_mujoco200.sh
+      - name: Install native public CPU inference dependencies
+        run: bash scripts/nevo_full_native_deps.sh
+      - name: Authenticate and cache original public sentence encoder revision
+        run: timeout 160s python -u scripts/nevo_public_encoder_pin.py
+      - name: Execute unchanged full-size learner constructor mask task and forward
+        env:
+          HF_HUB_OFFLINE: '1'
+          TRANSFORMERS_OFFLINE: '1'
+          TOKENIZERS_PARALLELISM: 'false'
+        run: timeout 520s python -u scripts/nevo_full_native_cpu.py
