@@ -34,6 +34,8 @@ jobs:
         run: sudo apt-get update -qq && sudo apt-get install -y -qq libosmesa6-dev libglew-dev libgl1-mesa-dev libglfw3 libglfw3-dev patchelf unzip
       - name: Install pinned historical MetaWorld and mujoco-py bindings
         run: bash scripts/install_historical_metaworld.sh nevo
+      - name: Install original wrapper import dependencies (no DMC environment execution)
+        run: python -m pip install 'dm-env==1.6' 'dm-control==1.0.23'
       - name: Download and SHA256 receipt of official MuJoCo 2.0 binaries and key
         run: timeout 130s bash scripts/install_official_mujoco200.sh
       - name: Original MT50 create reset and step (no learning)
