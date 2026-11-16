@@ -1,0 +1,1 @@
+This public-only CPU qualification uses pinned Nevo-CRL and WAVE sources. No private information, model training, or paid services are involved.
