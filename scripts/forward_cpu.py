@@ -36,12 +36,13 @@ print("CPU_ENVIRONMENT_RECEIPT", json.dumps({
 if backend != "cpu":
     raise RuntimeError("CPU-only execution required")
 
-from jaxrl.networks.policies import MSEPolicy
+from jaxrl.networks.policies import NormalTanhPolicy
 
 obs = jnp.arange(39, dtype=jnp.float32).reshape(1, 39) / 100
-policy = MSEPolicy(hidden_dims=(32, 32), action_dim=4)
+policy = NormalTanhPolicy(hidden_dims=(32, 32), action_dim=4)
 parameters = policy.init(jax.random.PRNGKey(2026), obs)
-actions = np.asarray(policy.apply(parameters, obs))
+distribution = policy.apply(parameters, obs)
+actions = np.asarray(distribution.mode())
 if actions.shape != (1, 4) or not np.isfinite(actions).all():
     raise AssertionError("Policy produced wrong shape or nonfinite values")
 
