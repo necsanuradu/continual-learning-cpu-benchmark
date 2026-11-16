@@ -47,5 +47,8 @@ jobs:
         run: sudo apt-get update -qq && sudo apt-get install -y -qq libosmesa6-dev libglew-dev libgl1-mesa-dev libglfw3 libglfw3-dev patchelf
       - name: Original historical MetaWorld and MuJoCo dependencies
         run: bash scripts/install_historical_metaworld.sh "${{ matrix.competitor }}"
+      - name: Restore official legacy MuJoCo 2.0 engine (Nevo only)
+        if: matrix.competitor == 'nevo'
+        run: bash scripts/install_official_mujoco200.sh
       - name: Try native original MT50 creation reset and step
         run: timeout 150s python -u scripts/historical_metaworld_cpu.py "${{ matrix.competitor }}"
