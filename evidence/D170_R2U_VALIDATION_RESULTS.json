@@ -1,0 +1,37 @@
+{
+  "schema": "D170-R2U/nontraining-executable-acceptance-v1",
+  "source_commit": "2083071fda845de4a2ae357775c9185890f80b20",
+  "run_id": 43926856249,
+  "workflow_conclusion": "success",
+  "synthetic_tests": {
+    "passed": 12,
+    "failed": 0
+  },
+  "prior_contract_regression": {
+    "passed": 8,
+    "failed": 0
+  },
+  "artifact": {
+    "name": "D170-R2U-synthetic-journal-only",
+    "id": 14257385433,
+    "bytes": 640
+  },
+  "journal_behaviour": {
+    "completed_operations": 1,
+    "interrupted_operations": 1,
+    "neural_optimizer_updates": 0,
+    "duplicate_counting_rejected": true,
+    "source_pin_enforced": true,
+    "interruption_recovery": true,
+    "stage_attribution": true,
+    "unknown_work_not_fabricated": true
+  },
+  "remaining_blockers": [
+    "Live original learner training hooks unqualified",
+    "Actual native optimizer runtime and memory unmeasured",
+    "No published source-code redistribution permission established for selected competitors",
+    "Controlled and native protocol seeds/budgets distinct",
+    "Founder/CTO neural training authorization absent"
+  ],
+  "disposition": "PASS_NONTRAINING_EVENT_ACCOUNTING_NO_GO_NEURAL_TRAINING"
+}
