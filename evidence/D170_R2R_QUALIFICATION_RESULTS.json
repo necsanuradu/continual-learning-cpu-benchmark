@@ -1,0 +1,92 @@
+{
+  "schema": "D170-R2R/public-qualified-runtime-results-v1",
+  "date": "2026-11-16",
+  "qualification_only": true,
+  "training_authorized": false,
+  "training_updates": 0,
+  "reproducibility": {
+    "workflow_sources_committed": true,
+    "only_public_comparator_code": true,
+    "original_upstream_sources_unmodified": true
+  },
+  "nevo_encoder_integrity": {
+    "result": "PASS",
+    "run_id": 43882825412,
+    "commit": "baed0ccdefc59a6f8b647fb8d4a5eee54d769aa3",
+    "job_id": 133352938629,
+    "source_repository": "yeshenpy/Nevo-CRL",
+    "source_sha": "fe0456e1ae5382213d12421270209eb3f47a9a0f",
+    "encoder_repository": "sentence-transformers/all-MiniLM-L12-v2",
+    "encoder_revision": "a50ef00143b4d5391434df20ae11632588ac25be",
+    "assets_verified": 29,
+    "git_blobs_verified": 15,
+    "lfs_blobs_verified": 14,
+    "inventory_sha256": "ba794273b1d0318adc0be01d511031f4dff61a5ce9e84773df2f1364ac17b90e",
+    "corrupted_weight_rejected": true,
+    "missing_modules_file_rejected": true,
+    "wrong_revision_rejected": true,
+    "loaded_checkpoint": "pytorch_model.bin",
+    "matching_original_loaded_tensors": 200,
+    "different_tensors": 0,
+    "offline_native_constructor_pass": true,
+    "native_task_embedding_pass": true,
+    "native_mask_initialization_pass": true,
+    "native_forward_pass": true,
+    "optimizer_steps": 0
+  },
+  "cw_native": {
+    "original_repository": "awarelab/continual_world",
+    "original_source_sha": "73f63bb4fa0b5d00bda973e20dfb783bfcf1b8aa",
+    "source_license": "UNVERIFIED; no root LICENSE; no source redistributed in benchmark",
+    "github_run_id": 43883076410,
+    "qualification_commit": "3bed3655b2a1e1c41d224618e6dbe6a77ab933fa",
+    "original_physics": {
+      "metaworld_sha": "0875192baaa91c43523708f55866d98eaf3facaf",
+      "mujoco_engine": "2.0",
+      "mujoco_py": "2.0.2.8",
+      "gym": "0.24.1"
+    },
+    "platform": {
+      "python": "3.8.18",
+      "tensorflow": "2.10.1",
+      "device": "CPU"
+    },
+    "cw20_tasks": 20,
+    "observation_width": 32,
+    "action_width": 4,
+    "task_onehot_width": 20,
+    "original_training_steps": 0,
+    "simulator_diagnostic_steps": 1,
+    "methods": {
+      "EWC_SAC": {
+        "job_id": 133353819137,
+        "result": "PASS",
+        "original_simulator_reset_and_step": true,
+        "native_constructor": true,
+        "finite_forward": true,
+        "action_shape": [
+          4
+        ],
+        "optimizer_steps": 0
+      },
+      "PackNet_SAC": {
+        "job_id": 133353819855,
+        "result": "PASS",
+        "original_simulator_reset_and_step": true,
+        "native_constructor": true,
+        "finite_forward": true,
+        "action_shape": [
+          4
+        ],
+        "optimizer_steps": 0
+      }
+    },
+    "scientific_caveat": "Original CW hides task ID from actor backbone under config hide_task_id=True, while its multi-head selector uses task-index one-hot vectors. Nevo uses original task-description encoder. Original method equivalence cannot be asserted from task names alone.",
+    "no_learning_conclusion": "EWC importance, task switching, PackNet pruning/retraining, sequential retention and complete training are not exercised or verified."
+  },
+  "wave": {
+    "result": "BLOCKED",
+    "reason": "Original learned SOM weight assets unavailable; no synthetic substitute allowed"
+  },
+  "go_no_go": "CONDITIONAL_GO_FOR_NONTRAINING_BENCHMARK_ENGINEERING; NO_GO_FOR_COMPARATIVE_TRAINING_UNTIL_RIGHTS_AND_PROTOCOL_AND_FOUNDER_AUTHORIZATION"
+}
