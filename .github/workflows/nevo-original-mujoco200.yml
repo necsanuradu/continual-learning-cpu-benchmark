@@ -1,4 +1,5 @@
 name: Original Nevo MuJoCo 2.0 MetaWorld CPU execution
+run-name: Nevo MuJoCo 2.0 original wrapper dependency qualification
 
 on:
   workflow_dispatch:
