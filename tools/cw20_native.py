@@ -65,8 +65,12 @@ def guarded_cw_evaluation(agent, seq_idx, callback, state_digest=cw_state):
                 raise QualificationError("Native on_test_end failed: "+repr(e)) from e
         after=state_digest(agent)
         if after != before:
-            changed = sorted(k for k in (set(before)|set(after)) if before.get(k) != after.get(k))
-            raise QualificationError("Native EWC/PackNet LIVE model state not restored: " + ",".join(changed[:12]))
+            if isinstance(before, dict) and isinstance(after, dict):
+                changed = sorted(k for k in (set(before)|set(after)) if before.get(k) != after.get(k))
+                details = ",".join(changed[:12])
+            else:
+                details = "non-mapping snapshot differs"
+            raise QualificationError("Native EWC/PackNet LIVE model state not restored: " + details)
     if original_error is not None:
         raise original_error
     return result

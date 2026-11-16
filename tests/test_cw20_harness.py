@@ -105,8 +105,8 @@ class Tests(unittest.TestCase):
         class FakeAgent:
             actor=None;critic1=None;critic2=None;target_critic1=None;target_critic2=None
             def __init__(self):
-                self.current_view=FakeTensor(-1)
-                self.freeze_biases_and_normalization=FakeTensor(False)
+                # No model variables in this pure-stdlib test. Real CI native
+                # model snapshot checks numpy-backed parameters exactly.
                 self.saved_variables={FakeOwner():FakeTensor(0)}
                 self.owner={}
         agent=FakeAgent()
