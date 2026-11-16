@@ -1,0 +1,57 @@
+name: D170-R2T pinned original training-protocol static audit
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/d170-r2t-static.yml'
+      - 'tools/d170_r2t_static.py'
+      - 'tools/d170_r2t_cost.py'
+      - 'tests/test_d170_r2t.py'
+      - 'docs/D170_R2T_COMPARISON_CONTRACT.md'
+
+permissions:
+  contents: read
+
+jobs:
+  verify-original-protocol:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+      - name: No-training neutral cost and negative tests
+        run: python -m unittest discover -s tests -p 'test_d170_r2t.py' -v
+      - name: Retrieve immutable upstream Nevo and Continual World source only
+        run: |
+          git clone -q --no-checkout --filter=blob:none https://github.com/yeshenpy/Nevo-CRL.git /tmp/r2t-nevo
+          git -C /tmp/r2t-nevo checkout -q --detach fe0456e1ae5382213d12421270209eb3f47a9a0f
+          git clone -q --no-checkout --filter=blob:none https://github.com/awarelab/continual_world.git /tmp/r2t-cw
+          git -C /tmp/r2t-cw checkout -q --detach 73f63bb4fa0b5d00bda973e20dfb783bfcf1b8aa
+      - name: Authenticate source hashes and static train/transition paths
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from tools.d170_r2t_static import run
+          from tools.d170_r2t_cost import source_configured_ledger,comparison_gate
+          result=run("/tmp/r2t-nevo","/tmp/r2t-cw")
+          reports={name:source_configured_ledger(name,result["source_shas"]["nevo" if name=="nevo" else "continual_world"]) for name in ("nevo","ewc","packnet")}
+          result["cost_contract"]=reports
+          result["train_comparison_gate"]=comparison_gate(reports)
+          assert result["train_comparison_gate"]["result"]=="NO_GO"
+          assert result["training_performed"] is False
+          p=Path("d170_r2t_static_evidence.json")
+          p.write_text(json.dumps(result,sort_keys=True,indent=2)+"\n")
+          print("D170_R2T_PINNED_STATIC_AND_COST_PASS "+json.dumps({"source_shas":result["source_shas"],"comparison_gate":"NO_GO_UNTIL_TRAINING_AUTHORIZED","training_updates":0},sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: D170-R2T-pinned-static-nontraining-evidence
+          path: d170_r2t_static_evidence.json
+          if-no-files-found: ignore
