@@ -1,0 +1,55 @@
+name: Public competitor CPU qualification
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/cpu-qualification.yml'
+      - 'scripts/**'
+
+permissions:
+  contents: read
+
+jobs:
+  cpu-qualification:
+    name: ${{ matrix.competitor }} / Python ${{ matrix.python }}
+    runs-on: ubuntu-22.04
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - competitor: nevo
+            python: '3.8'
+          - competitor: wave
+            python: '3.10'
+    env:
+      CUDA_VISIBLE_DEVICES: '-1'
+      JAX_PLATFORM_NAME: cpu
+      JAX_PLATFORMS: cpu
+      WANDB_MODE: offline
+      WANDB_DISABLED: 'true'
+      PIP_NO_INPUT: '1'
+      XLA_PYTHON_CLIENT_PREALLOCATE: 'false'
+    steps:
+      - name: Checkout public qualification scripts
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup historical Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Fetch pinned public source
+        shell: bash
+        run: bash scripts/fetch_source.sh "${{ matrix.competitor }}"
+
+      - name: Install CPU-only packages
+        shell: bash
+        run: bash scripts/install_cpu.sh "${{ matrix.competitor }}"
+
+      - name: Original-source CPU policy forward (zero training)
+        shell: bash
+        run: python scripts/forward_cpu.py "${{ matrix.competitor }}"
